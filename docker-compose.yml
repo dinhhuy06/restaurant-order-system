@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: restaurant-postgres
+    environment:
+      POSTGRES_USER: restaurant
+      POSTGRES_PASSWORD: restaurant123
+      POSTGRES_DB: restaurantdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docs/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: restaurant-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  pgdata:
