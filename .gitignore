@@ -1,0 +1,16 @@
+# Môi trường và bí mật
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Log
+*.log
+
+# Thư mục build / thư viện
+node_modules/
+bin/
+obj/
+target/
+__pycache__/
