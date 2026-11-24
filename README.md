@@ -89,6 +89,9 @@ Client -> Order API -> RabbitMQ -> Kitchen Worker -> RabbitMQ -> Notification Se
 
 
 \## Cách chạy
+1. Chạy hạ tầng: `docker compose up -d`
+2. Chạy API: `cd order-api && dotnet run` (mặc định http://localhost:5080)
+3. Thử: `GET /menu`, `POST /orders`, `GET /orders`, `GET /orders/{id}`
 
 
 
