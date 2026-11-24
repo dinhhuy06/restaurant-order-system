@@ -54,6 +54,41 @@ app.MapPost("/orders", async (CreateOrderRequest req, NpgsqlDataSource db) =>
 
     return Results.Created($"/orders/{orderId}", new { id = orderId, status = "Pending" });
 });
+app.MapGet("/orders/{id:int}", async (int id, NpgsqlDataSource db) =>
+{
+    await using var conn = await db.OpenConnectionAsync();
+
+    var order = await conn.QuerySingleOrDefaultAsync(
+        @"SELECT id, customer_name AS ""customerName"", status,
+                 created_at AS ""createdAt"", updated_at AS ""updatedAt""
+          FROM orders WHERE id = @id", new { id });
+    if (order is null)
+        return Results.NotFound(new { error = $"Không tìm thấy đơn {id}" });
+
+    var items = await conn.QueryAsync(
+        @"SELECT oi.menu_item_id AS ""menuItemId"", m.name, m.price, oi.quantity
+          FROM order_items oi
+          JOIN menu_items m ON m.id = oi.menu_item_id
+          WHERE oi.order_id = @id ORDER BY oi.id", new { id });
+
+    return Results.Ok(new
+    {
+        order.id, order.customerName, order.status,
+        order.createdAt, order.updatedAt, items
+    });
+});
+
+app.MapGet("/orders", async (string? status, NpgsqlDataSource db) =>
+{
+    await using var conn = await db.OpenConnectionAsync();
+    var orders = await conn.QueryAsync(
+        @"SELECT id, customer_name AS ""customerName"", status,
+                 created_at AS ""createdAt"", updated_at AS ""updatedAt""
+          FROM orders
+          WHERE (@status IS NULL OR status = @status)
+          ORDER BY created_at DESC", new { status });
+    return Results.Ok(orders);
+});
 app.Run();
 record CreateOrderRequest(string CustomerName, List<OrderItemRequest> Items);
 record OrderItemRequest(int MenuItemId, int Quantity);
